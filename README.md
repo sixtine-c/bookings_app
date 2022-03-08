@@ -96,19 +96,19 @@ Bookings
 Create:
 curl -i -X POST \
      -H 'Content-Type: application/json'    \
-     -d '{ "listing_id": 7 ,"start_date": "2016-12-14", "end_date": "2016-12-21" }' \
+     -d '{ "listing_id": 1 ,"start_date": "2016-12-14", "end_date": "2016-12-21" }' \
      http://localhost:3000/api/v1/bookings
 
 
 Update:
 curl -i -X PATCH \
        -H 'Content-Type: application/json' \
-       -d '{  "end_date": "2016-11-14" }'\
-       http://localhost:3000/api/v1/bookings/4
+       -d '{  "start_date": "2016-12-15" }'\
+       http://localhost:3000/api/v1/bookings/19
 
 Delete:
 curl -i -X DELETE                               \
-     http://localhost:3000/api/v1/bookings/4
+     http://localhost:3000/api/v1/bookings/17
 
 
 Reservations

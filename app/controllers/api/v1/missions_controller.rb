@@ -39,7 +39,14 @@ class Api::V1::MissionsController < Api::V1::BaseController
   # File.open(outputpath, 'w') do |file|
   #   file.write(JSON.pretty_generate(output))
   # end
+  end
 
+  def update
+    if @mission.update(mission_params)
+      render :show, status: :created
+    else
+      render_error
+    end
   end
 
   def destroy

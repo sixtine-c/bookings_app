@@ -12,7 +12,7 @@ Rails.application.routes.draw do
       resources :listings, only: [:index, :show, :create, :update, :destroy]
       resources :bookings, only: [:index, :show, :create, :update, :destroy]
       resources :reservations, only: [:index, :show, :create, :update, :destroy]
-      resources :missions, only: [:index, :create, :destroy]
+      resources :missions, only: [:index, :create, :update, :destroy]
     end
   end
 end

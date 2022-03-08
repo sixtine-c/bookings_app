@@ -1,5 +1,11 @@
 class Api::V1::BookingsController < Api::V1::BaseController
   before_action :set_bookings, only: [:show, :update, :destroy]
+  before_action :find_mission_checkin, only: [:update, :destroy]
+  before_action :find_mission_checkout, only: [:update, :destroy]
+
+  require 'uri'
+  require 'net/http'
+  require 'json'
 
   def index
     @bookings = Booking.all
@@ -22,15 +28,18 @@ class Api::V1::BookingsController < Api::V1::BaseController
   def update
     if @booking.update(booking_params)
       render :show, status: :created
+
+      update_checkin_mission_from_bookings if (@mission_checkin[:date] != @booking[:start_date] && @mission_checkin[:mission_type] == "first_checkin")
+      update_checkout_mission_from_bookings if (@mission_checkout[:date] != @booking[:end_date] && @mission_checkout[:mission_type] == "last_checkout")
     else
       render_error
     end
   end
 
   def destroy
+    delete_mission_from_booking
     @booking.destroy
     head :no_content
-    delete_mission_from_booking
   end
 
   private
@@ -39,41 +48,67 @@ class Api::V1::BookingsController < Api::V1::BaseController
     @booking = Booking.find(params[:id])
   end
 
+  def find_mission_checkin
+    @mission_checkin = Mission.find_by(listing_id: @booking[:listing_id], date: @booking[:start_date])
+  end
+
+  def find_mission_checkout
+    @mission_checkout = Mission.find_by(listing_id: @booking[:listing_id], date: @booking[:end_date])
+  end
+
   def create_mission_from_bookings
     @listing = Listing.find(params[:listing_id])
     price_checkin = 10 * @listing[:num_rooms]
     price_checkout = 5 * @listing[:num_rooms]
-    require 'uri'
-    require 'net/http'
-    require 'json'
+
     # checkin
+    body = {listing_id: @booking[:listing_id], mission_type: 'first_checkin', date: @booking[:start_date], price: price_checkin }.to_json
+    http_request_post(body)
+
+    # checkout
+    body = {listing_id: @booking[:listing_id], mission_type: 'last_checkout', date: @booking[:end_date], price: price_checkout }.to_json
+    http_request_post(body)
+  end
+
+  def http_request_post(body)
     uri = URI('http://localhost:3000/api/v1/missions')
     http = Net::HTTP.new(uri.host, uri.port)
     req = Net::HTTP::Post.new(uri.path, 'Content-Type' => 'application/json')
-    req.body = {listing_id: @booking[:listing_id], mission_type: 'first_checkin', date: @booking[:start_date], price: price_checkin }.to_json
+    req.body = body
     http.request(req)
-    # puts "response #{res.body}"
+  end
 
-    # checkout
-    req.body = {listing_id: @booking[:listing_id], mission_type: 'last_checkout', date: @booking[:end_date], price: price_checkout }.to_json
+  def update_checkin_mission_from_bookings
+    url = "http://localhost:3000/api/v1/missions/#{@mission_checkin.id}"
+    body = {date: @booking[:start_date]}.to_json
+    http_request_patch(url, body)
+  end
+
+  def update_checkout_mission_from_bookings
+    url = "http://localhost:3000/api/v1/missions/#{@mission_checkout.id}"
+    body = {date: @booking[:end_date]}.to_json
+    http_request_patch(url, body)
+  end
+
+  def http_request_patch(url, body)
+    uri = URI(url)
+    http = Net::HTTP.new(uri.host, uri.port)
+    req = Net::HTTP::Patch.new(uri.path, 'Content-Type' => 'application/json')
+    req.body = body
     http.request(req)
   end
 
   def delete_mission_from_booking
-    mission_checkin = Mission.find_by(listing_id: @booking[:listing_id], date: @booking[:start_date])
-    mission_checkout = Mission.find_by(listing_id: @booking[:listing_id], date: @booking[:end_date])
-    require 'uri'
-    require 'net/http'
-    require 'json'
+    # delete checkin
+    url = "http://localhost:3000/api/v1/missions/#{@mission_checkin.id}"
+    http_request_delete(url)
+    # delete checkout
+    url = "http://localhost:3000/api/v1/missions/#{@mission_checkout.id}"
+    http_request_delete(url)
+  end
 
-    #checkin
-    uri = URI("http://localhost:3000/api/v1/missions/#{mission_checkin.id}")
-    http = Net::HTTP.new(uri.host, uri.port)
-    req = Net::HTTP::Delete.new(uri)
-    http.request(req)
-
-    #checkout
-    uri = URI("http://localhost:3000/api/v1/missions/#{mission_checkout.id}")
+  def http_request_delete(url)
+    uri = URI(url)
     http = Net::HTTP.new(uri.host, uri.port)
     req = Net::HTTP::Delete.new(uri)
     http.request(req)
