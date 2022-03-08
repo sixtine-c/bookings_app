@@ -129,3 +129,8 @@ curl -i -X PATCH \
 Delete:
 curl -i -X DELETE                               \
      http://localhost:3000/api/v1/reservations/4
+
+-reverifier les request de bookings
+-créer request reservations
+-comment enlever missions quand booking annulé ?
+-dans seed, créer les premières missions

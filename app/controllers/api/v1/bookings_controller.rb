@@ -56,7 +56,6 @@ class Api::V1::BookingsController < Api::V1::BaseController
     # checkout
     req.body = {listing_id: @booking[:listing_id], mission_type: 'last_checkout', date: @booking[:end_date], price: price_checkout }.to_json
     http.request(req)
-
   end
 
   def booking_params
