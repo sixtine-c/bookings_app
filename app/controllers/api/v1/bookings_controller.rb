@@ -30,6 +30,7 @@ class Api::V1::BookingsController < Api::V1::BaseController
   def destroy
     @booking.destroy
     head :no_content
+    delete_mission_from_booking
   end
 
   private
@@ -55,6 +56,26 @@ class Api::V1::BookingsController < Api::V1::BaseController
 
     # checkout
     req.body = {listing_id: @booking[:listing_id], mission_type: 'last_checkout', date: @booking[:end_date], price: price_checkout }.to_json
+    http.request(req)
+  end
+
+  def delete_mission_from_booking
+    mission_checkin = Mission.find_by(listing_id: @booking[:listing_id], date: @booking[:start_date])
+    mission_checkout = Mission.find_by(listing_id: @booking[:listing_id], date: @booking[:end_date])
+    require 'uri'
+    require 'net/http'
+    require 'json'
+
+    #checkin
+    uri = URI("http://localhost:3000/api/v1/missions/#{mission_checkin.id}")
+    http = Net::HTTP.new(uri.host, uri.port)
+    req = Net::HTTP::Delete.new(uri)
+    http.request(req)
+
+    #checkout
+    uri = URI("http://localhost:3000/api/v1/missions/#{mission_checkout.id}")
+    http = Net::HTTP.new(uri.host, uri.port)
+    req = Net::HTTP::Delete.new(uri)
     http.request(req)
   end
 
