@@ -70,14 +70,6 @@ class Api::V1::BookingsController < Api::V1::BaseController
     http_request_post(body)
   end
 
-  def http_request_post(body)
-    uri = URI('http://localhost:3000/api/v1/missions')
-    http = Net::HTTP.new(uri.host, uri.port)
-    req = Net::HTTP::Post.new(uri.path, 'Content-Type' => 'application/json')
-    req.body = body
-    http.request(req)
-  end
-
   def update_checkin_mission_from_bookings
     url = "http://localhost:3000/api/v1/missions/#{@mission_checkin.id}"
     body = {date: @booking[:start_date]}.to_json
@@ -90,14 +82,6 @@ class Api::V1::BookingsController < Api::V1::BaseController
     http_request_patch(url, body)
   end
 
-  def http_request_patch(url, body)
-    uri = URI(url)
-    http = Net::HTTP.new(uri.host, uri.port)
-    req = Net::HTTP::Patch.new(uri.path, 'Content-Type' => 'application/json')
-    req.body = body
-    http.request(req)
-  end
-
   def delete_mission_from_booking
     # delete checkin
     url = "http://localhost:3000/api/v1/missions/#{@mission_checkin.id}"
@@ -105,13 +89,6 @@ class Api::V1::BookingsController < Api::V1::BaseController
     # delete checkout
     url = "http://localhost:3000/api/v1/missions/#{@mission_checkout.id}"
     http_request_delete(url)
-  end
-
-  def http_request_delete(url)
-    uri = URI(url)
-    http = Net::HTTP.new(uri.host, uri.port)
-    req = Net::HTTP::Delete.new(uri)
-    http.request(req)
   end
 
   def booking_params

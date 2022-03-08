@@ -104,11 +104,11 @@ Update:
 curl -i -X PATCH \
        -H 'Content-Type: application/json' \
        -d '{  "start_date": "2016-12-15" }'\
-       http://localhost:3000/api/v1/bookings/19
+       http://localhost:3000/api/v1/bookings/21
 
 Delete:
 curl -i -X DELETE                               \
-     http://localhost:3000/api/v1/bookings/17
+     http://localhost:3000/api/v1/bookings/23
 
 
 Reservations
