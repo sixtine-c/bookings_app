@@ -1,5 +1,5 @@
 class Api::V1::MissionsController < Api::V1::BaseController
-  before_action :set_missions, only: [:show, :update, :destroy]
+  before_action :set_missions, only: %i[show update destroy]
 
   # outpupath = 'lib/data/missions.json'
 

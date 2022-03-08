@@ -1,5 +1,5 @@
 class Api::V1::ListingsController < Api::V1::BaseController
-  before_action :set_listings, only: [:show, :update, :destroy]
+  before_action :set_listings, only: %i[show update destroy]
 
   def index
     @listings = Listing.all

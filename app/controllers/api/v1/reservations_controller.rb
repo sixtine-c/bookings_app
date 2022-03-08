@@ -16,7 +16,9 @@ class Api::V1::ReservationsController < Api::V1::BaseController
       @listing = Listing.find_by(id: @reservation[:listing_id])
 
       @listing.bookings.each do |booking|
-        create_mission_from_reservations if (@reservation[:end_date] >= booking[:start_date] && @reservation[:end_date] < booking[:end_date])
+        if @reservation[:end_date] >= booking[:start_date] && @reservation[:end_date] < booking[:end_date]
+          create_mission_from_reservations
+        end
       end
     else
       render_error
@@ -61,7 +63,8 @@ class Api::V1::ReservationsController < Api::V1::BaseController
   def create_mission_from_reservations
     price_checkout_checkin = 10 * @listing[:num_rooms]
 
-    body = { listing_id: @reservation[:listing_id], mission_type: 'checkout_checkin', date: @reservation[:end_date], price: price_checkout_checkin }.to_json
+    body = { listing_id: @reservation[:listing_id], mission_type: 'checkout_checkin', date: @reservation[:end_date],
+             price: price_checkout_checkin }.to_json
     http_request_post(body)
   end
 
