@@ -1,4 +1,29 @@
 class Reservation < ApplicationRecord
   belongs_to :listing
-  has_many :bookings, through: :listings
+
+  VALID_DATE_REGEX = /([12]\d{3}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01]))/i
+
+  validates :start_date, presence: true, format: { with: VALID_DATE_REGEX }
+
+  validates :end_date, presence: true, format: { with: VALID_DATE_REGEX }
+
+  validates :listing_id, presence: true
+
+  validate :allow_dates, :reservations_must_not_overlap
+
+  private
+
+  def allow_dates
+    errors.add(:end_date, "can't be past or equal to start date") if end_date <= start_date
+  end
+
+  def reservations_must_not_overlap
+    overlap_relation = Reservation.where(listing_id: listing_id)
+                                  .where(
+                                    'DATE(reservations.start_date) < DATE(?) AND DATE(reservations.end_date) > DATE(?)',
+                                    end_date, start_date
+                                  )
+
+    errors.add(:start_date, "canot overlap another reservation for this listing") if overlap_relation.exists?
+  end
 end

@@ -69,6 +69,11 @@ The output JSON should resemble this
 }
 Go slowly, and write code that could be easily extensible and clean.
 
+Ideas & paths
+-In order to support a large amount of data, the missions are created, updated and deleted automatically when an event happens in bookings or reservations
+-the missions from the backend_test.rb are created in the seed
+-the output json with the missions index is populated on every missions index request
+
 CURL
 
 Listings
@@ -116,21 +121,19 @@ Reservations
 Create:
 curl -i -X POST \
      -H 'Content-Type: application/json'    \
-     -d '{ "reservation": { "listing_id": 7 ,"start_date": "2016-11-03", "end_date": "2016-11-11" } }' \
+     -d '{ "reservation": { "listing_id": 1 ,"start_date": "2016-12-14", "end_date": "2016-12-18" } }' \
      http://localhost:3000/api/v1/reservations
 
 
 Update:
 curl -i -X PATCH \
        -H 'Content-Type: application/json' \
-       -d '{  "end_date": "2016-11-14" }'\
-       http://localhost:3000/api/v1/reservations/4
+       -d '{  "end_date": "2016-11-19" }'\
+       http://localhost:3000/api/v1/reservations/9
 
 Delete:
 curl -i -X DELETE                               \
-     http://localhost:3000/api/v1/reservations/4
+     http://localhost:3000/api/v1/reservations/10
 
--reverifier les request de bookings
--créer request reservations
--comment enlever missions quand booking annulé ?
--dans seed, créer les premières missions
+Missions
+http://localhost:3000/api/v1/missions
