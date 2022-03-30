@@ -36,9 +36,9 @@ class Api::V1::ReservationsController < Api::V1::BaseController
   end
 
   def destroy
+    delete_mission_from_reservation
     @reservation.destroy
     head :no_content
-    delete_mission_from_reservation
   end
 
   private
@@ -62,20 +62,15 @@ class Api::V1::ReservationsController < Api::V1::BaseController
 
   def create_mission_from_reservations
     price_checkout_checkin = 10 * @listing[:num_rooms]
-
-    body = { listing_id: @reservation[:listing_id], mission_type: 'checkout_checkin', date: @reservation[:end_date],
-             price: price_checkout_checkin }.to_json
-    http_request_post(body)
+    Mission.create!(listing_id: @reservation[:listing_id], mission_type: 'checkout_checkin', date: @reservation[:end_date],
+                    price: price_checkout_checkin)
   end
 
   def update_checkin_checkout_mission
-    url = "http://localhost:3000/api/v1/missions/#{@mission_checkout_checkin.id}"
-    body = { date: @reservation[:end_date] }.to_json
-    http_request_patch(url, body)
+    @mission_checkout_checkin.update(date: @reservation[:end_date])
   end
 
   def delete_mission_from_reservation
-    url = "http://localhost:3000/api/v1/missions/#{@mission_checkout_checkin.id}"
-    http_request_delete(url)
+    @mission_checkout_checkin.destroy
   end
 end

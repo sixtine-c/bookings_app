@@ -28,7 +28,6 @@ class Api::V1::BookingsController < Api::V1::BaseController
   def update
     if @booking.update(booking_params)
       render :show, status: :created
-
       if @mission_checkin[:date] != @booking[:start_date] && @mission_checkin[:mission_type] == "first_checkin"
         update_checkin_mission_from_bookings
       end
@@ -66,35 +65,27 @@ class Api::V1::BookingsController < Api::V1::BaseController
     price_checkout = 5 * @listing[:num_rooms]
 
     # checkin
-    body = { listing_id: @booking[:listing_id], mission_type: 'first_checkin', date: @booking[:start_date],
-             price: price_checkin }.to_json
-    http_request_post(body)
+    Mission.create!(listing_id: @booking[:listing_id], mission_type: 'first_checkin', date: @booking[:start_date],
+                price: price_checkin)
 
     # checkout
-    body = { listing_id: @booking[:listing_id], mission_type: 'last_checkout', date: @booking[:end_date],
-             price: price_checkout }.to_json
-    http_request_post(body)
+    Mission.create!(listing_id: @booking[:listing_id], mission_type: 'last_checkout', date: @booking[:end_date],
+                    price: price_checkout)
   end
 
   def update_checkin_mission_from_bookings
-    url = "http://localhost:3000/api/v1/missions/#{@mission_checkin.id}"
-    body = { date: @booking[:start_date] }.to_json
-    http_request_patch(url, body)
+    @mission_checkin.update(date: @booking[:start_date])
   end
 
   def update_checkout_mission_from_bookings
-    url = "http://localhost:3000/api/v1/missions/#{@mission_checkout.id}"
-    body = { date: @booking[:end_date] }.to_json
-    http_request_patch(url, body)
+    @mission_checkout.update(date: @booking[:end_date])
   end
 
   def delete_mission_from_booking
     # delete checkin
-    url = "http://localhost:3000/api/v1/missions/#{@mission_checkin.id}"
-    http_request_delete(url)
+    @mission_checkin.destroy
     # delete checkout
-    url = "http://localhost:3000/api/v1/missions/#{@mission_checkout.id}"
-    http_request_delete(url)
+    @mission_checkout.destroy
   end
 
   def booking_params

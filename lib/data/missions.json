@@ -47,6 +47,12 @@
       "mission_type": "checkout_checkin",
       "date": "2016-10-18",
       "price": 10
+    },
+    {
+      "listing_id": 1,
+      "mission_type": "last_checkout",
+      "date": "2017-12-21",
+      "price": 10
     }
   ]
 }
